@@ -1,25 +1,16 @@
-# Flutuador-V0
-```
-Diretivas de compilação:
-[env:esp32doit-devkit-v1]
-platform = espressif32
-board = esp32doit-devkit-v1
-framework = arduino
-monitor_speed = 115200
-lib_deps = 
-	adafruit/Adafruit ADS1X15@^2.4.0
-	adafruit/Adafruit BME280 Library@^2.2.2
-	adafruit/Adafruit BMP280 Library@^2.6.2
-	adafruit/RTClib@^2.0.2
-	greenponik/DFRobot_ESP_PH_WITH_ADC_BY_GREENPONIK@^1.2.3
-	milesburton/DallasTemperature@^3.9.1
-	sandeepmistry/LoRa@^0.8.0
-	mcci-catena/MCCI LoRaWAN LMIC library@^4.1.1
-build_flags =
-    -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS
-    -D CFG_au915=1
-    -D CFG_sx1276_radio=1
-    -D LMIC_LORAWAN_SPEC_VERSION=LMIC_LORAWAN_SPEC_VERSION_1_0_3
-    -D LMIC_PRINTF_TO=Serial    
-    -D LMIC_ENABLE_arbitrary_clock_error=1
-```
+# Flutuador V0.5
+
+Este projeto de código foi desenvolvido para integrar diversos sensores com a placa Gravity e o sensor de temperatura DS18B20. Os sensores utilizados são:
+
+- ADC ADS1X15
+- Sensor de temperatura BMP280
+- Relógio interno da RTClib da AdaFruit
+- Sensores de pH, DO e ORP da categoria ENV-20 da Atlas-Scientific
+
+A integração desses sensores permite a leitura de diversas variáveis ambientais, como temperatura, pressão, pH, DO (oxigênio dissolvido) e ORP (potencial de oxidação-redução). A placa Gravity é utilizada como interface de comunicação entre os sensores e o microcontrolador.
+
+O sensor de temperatura DS18B20 é utilizado para monitorar a temperatura do ambiente em que os outros sensores estão sendo utilizados. Com essa informação, é possível realizar correções nas leituras dos outros sensores que são afetados pela temperatura, como o sensor de pH.
+
+O código foi desenvolvido em linguagem C++ e utiliza bibliotecas específicas para cada sensor. As leituras dos sensores são realizadas a cada intervalo de tempo determinado pelo relógio interno da RTClib.
+
+Com esse projeto, é possível realizar monitoramento ambiental de forma precisa e eficiente, permitindo o controle de variáveis importantes para diversas aplicações, como aquicultura, hidroponia, tratamento de efluentes, entre outras.
