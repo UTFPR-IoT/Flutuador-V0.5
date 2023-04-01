@@ -24,10 +24,10 @@
 #define I2C_SCL 22
 
 // Cartao SD pinout
-#define  SD_CS      33
-#define  SD_MOSI    2
-#define  SD_MISO    32
-#define  SD_CLK     4
+#define SD_SCK 4
+#define SD_MISO 32
+#define SD_MOSI 2
+#define SD_CS 33
 
 
 //tempo de atualização em milisegundos
@@ -74,6 +74,7 @@ const lmic_pinmap lmic_pins = {
 byte payload[2]; // Enviando um vetor de bytes - Prática 2, parte 2
 static uint16_t mydata = 0; // Variável do contador - Prática 2, parte 2
 static osjob_t sendjob;
+bool flag = false; // Flag para debounce
 
 //intervalo de envio
 const unsigned TX_INTERVAL = 20;
@@ -282,83 +283,6 @@ void loop() {
 
 
 
-void getLeituraADS() 
-{
-  int16_t adc1, adc2, adc3;
-  float mV1, mV2, mV3;
-
- // adc0 = ads.readADC_SingleEnded(0);
-  adc1 = ads.readADC_SingleEnded(1);
-  adc2 = ads.readADC_SingleEnded(2);
-  adc3 = ads.readADC_SingleEnded(3);
-
- // volts0 = ads.computeVolts(adc0);
-  mV1 = ads.computeVolts(adc1) * 1000;
-  mV2 = ads.computeVolts(adc2) * 1000;
-  mV3 = ads.computeVolts(adc3) * 1000;
-/*
-  Serial.println("-----------------------------------------------------------");
- // Serial.print("DATA-HORA: "); 
-  Serial.print(String(rtc.now().day())); 
-  Serial.print("/");
-  Serial.print(String(rtc.now().month())); 
-  Serial.print("/");
-  Serial.print(String(rtc.now().year())); 
-  Serial.print("  ");
-  Serial.print(String(rtc.now().hour())); 
-  Serial.print(":");
-  Serial.print(String(rtc.now().minute())); 
-  Serial.print(":");
-  Serial.print(String(rtc.now().second())); 
-  Serial.print("  ");
-
-  Serial.print("pH: "); Serial.print(read_pH(mV1)); Serial.print("("); Serial.print(mV1); Serial.print("mV)  ");
-  Serial.print("DO: "); Serial.print(read_do(mV2)); Serial.print("("); Serial.print(mV2); Serial.print("mV)  ");
-  Serial.print("ORP: "); Serial.print(read_orp(mV3)); Serial.print("("); Serial.print(mV3); Serial.print("mV)  ");
-  Serial.print("Temp : "); Serial.print(read_temp());Serial.print(" ");
-  Serial.print("Temp IN: "); Serial.print(read_bmp280());Serial.println(" ");*/
-
- // DATA
-  String leitura = String(rtc.now().day());
-  leitura += "/";
-  leitura += String(rtc.now().month());
-  leitura += "/";
-  leitura += String(rtc.now().year());
-  leitura += ";  ";
-  //  HORA
-  leitura += String(rtc.now().hour());
-  leitura += ":";
-  leitura += String(rtc.now().minute());
-  leitura += ":";
-  leitura += String(rtc.now().second());
-  leitura += "; ";
-  // pH
-  leitura += String(read_pH(mV1));
-  leitura += "; ";
-  // DO
-  leitura += String(read_do(mV2));
-  leitura += "; ";
-  // ORP
-  leitura += String(read_orp(mV3));
-  leitura += "; ";
-  // Temp
-  leitura += String(read_temp());
-  leitura += "; ";
-  // Temp IN
-  leitura += String(read_bmp280());
-  leitura += "; ";
-  // Battery
-  leitura += String(0);
-  leitura += "; \r\n";
-  
-  
-  
-  Serial.println(" ");
-  Serial.println("date; time; pH; DO; ORP; Temp; Temp IN; Battery;");
-  Serial.println(leitura); 
-
-  appendFile(SD, "/data.csv", leitura.c_str());
-}
 
 void appendFile(fs::FS &fs, const char * path, const char * message) {
   Serial.printf("Appending to file: %s\n", path);
@@ -394,8 +318,7 @@ void writeFile(fs::FS &fs, const char * path, const char * message) {
 
 
 
-void setupSD() 
-{
+void setupSD() {
   //digitalWrite(RFM95_CS, HIGH);
   //digitalWrite(SD_CS, LOW);
 
@@ -405,7 +328,7 @@ void setupSD()
   //if (!SD.begin( SD_CS, spi1)) 
   SPIClass mySPI = SPIClass(HSPI);
   mySPI.begin(SD_SCK, SD_MISO, SD_MOSI);
-  if(!SD.begin(SD_CS, mySPI, 10000000)){
+  if(!SD.begin(SD_CS, mySPI, 10000000))
   {
     Serial.println("Erro na leitura do arquivo não existe um cartão SD ou o módulo está conectado incorretamente...");
     return;
@@ -497,4 +420,82 @@ void setupRTC()
   rtc.begin();                                        // Inicia o módulo RTC
   rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));     // Ajuste Automático da hora e data
   //rtc.adjust(DateTime(2022, 5, 1, 15, 37, 0));   // Ajuste Manual (Ano, Mês, Dia, Hora, Min, Seg)
+}
+
+void getLeituraADS() 
+{
+  int16_t adc1, adc2, adc3;
+  float mV1, mV2, mV3;
+
+ // adc0 = ads.readADC_SingleEnded(0);
+  adc1 = ads.readADC_SingleEnded(1);
+  adc2 = ads.readADC_SingleEnded(2);
+  adc3 = ads.readADC_SingleEnded(3);
+
+ // volts0 = ads.computeVolts(adc0);
+  mV1 = ads.computeVolts(adc1) * 1000;
+  mV2 = ads.computeVolts(adc2) * 1000;
+  mV3 = ads.computeVolts(adc3) * 1000;
+/*
+  Serial.println("-----------------------------------------------------------");
+ // Serial.print("DATA-HORA: "); 
+  Serial.print(String(rtc.now().day())); 
+  Serial.print("/");
+  Serial.print(String(rtc.now().month())); 
+  Serial.print("/");
+  Serial.print(String(rtc.now().year())); 
+  Serial.print("  ");
+  Serial.print(String(rtc.now().hour())); 
+  Serial.print(":");
+  Serial.print(String(rtc.now().minute())); 
+  Serial.print(":");
+  Serial.print(String(rtc.now().second())); 
+  Serial.print("  ");
+
+  Serial.print("pH: "); Serial.print(read_pH(mV1)); Serial.print("("); Serial.print(mV1); Serial.print("mV)  ");
+  Serial.print("DO: "); Serial.print(read_do(mV2)); Serial.print("("); Serial.print(mV2); Serial.print("mV)  ");
+  Serial.print("ORP: "); Serial.print(read_orp(mV3)); Serial.print("("); Serial.print(mV3); Serial.print("mV)  ");
+  Serial.print("Temp : "); Serial.print(read_temp());Serial.print(" ");
+  Serial.print("Temp IN: "); Serial.print(read_bmp280());Serial.println(" ");*/
+
+ // DATA
+  String leitura = String(rtc.now().day());
+  leitura += "/";
+  leitura += String(rtc.now().month());
+  leitura += "/";
+  leitura += String(rtc.now().year());
+  leitura += ";  ";
+  //  HORA
+  leitura += String(rtc.now().hour());
+  leitura += ":";
+  leitura += String(rtc.now().minute());
+  leitura += ":";
+  leitura += String(rtc.now().second());
+  leitura += "; ";
+  // pH
+  leitura += String(read_pH(mV1));
+  leitura += "; ";
+  // DO
+  leitura += String(read_do(mV2));
+  leitura += "; ";
+  // ORP
+  leitura += String(read_orp(mV3));
+  leitura += "; ";
+  // Temp
+  leitura += String(read_temp());
+  leitura += "; ";
+  // Temp IN
+  leitura += String(read_bmp280());
+  leitura += "; ";
+  // Battery
+  leitura += String(0);
+  leitura += "; \r\n";
+  
+  
+  
+  Serial.println(" ");
+  Serial.println("date; time; pH; DO; ORP; Temp; Temp IN; Battery;");
+  Serial.println(leitura); 
+
+  appendFile(SD, "/data.csv", leitura.c_str());
 }
