@@ -1,5 +1,7 @@
 {
     "files.associations": {
         "system_error": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "${workspaceFolder}/.pio/libdeps/esp32doit-devkit-v1/Adafruit BusIO"
 }

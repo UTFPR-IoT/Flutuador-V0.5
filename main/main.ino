@@ -13,7 +13,7 @@
 
 
 //SENSORES
-#define temp_pin        26
+#define temp_pin        5
 //#define VoltageAVGLen   100
 #define pH_pin          1
 #define DO_pin          2
@@ -392,7 +392,21 @@ float read_pH(float voltage_mV) {
 
   float ph_amostra_4 = 2005; //Valor em tensao referente a amostra de pH 4,01
   float ph_amostra_7 = 1486;//Valor em tensao referente a amostra de pH 7,01
-  
+
+  //float ph_amostra_4 = 2010.00mV; //Valor em tensao referente a amostra de pH 4,01
+  //float ph_amostra_7 = 1506.00mV;//Valor em tensao referente a amostra de pH 7,01
+  //float ph_amostra_10 = 1042.00mV;//Valor em tensao referente a amostra de pH 10,01
+
+  //equacao polinomial: 5e-07*xˆ2 - 0.0078*x + 17.579 
+  //6.74
+
+  //equacao linear: -0,0062x + 16,422
+  //6.86
+
+
+
+  //amostra -- 1542.00mV
+  //hhann 6,55 e 6,47
   float coeficiente_angular = (7.01 - 4.01) / (ph_amostra_7 - ph_amostra_4); // m = (y2-y1)/(x2-x1)
   float coeficiente_linear = 4.01 - (coeficiente_angular * ph_amostra_4); // n = y - m*x
 
@@ -451,25 +465,39 @@ void setupRTC()
 
 void getLeituraADS() 
 {
-  int16_t adc1, adc2, adc3;
-  float mV1, mV2, mV3;
+  int16_t adc0, adc1, adc2, adc3;
+  float mV0, mV1, mV2, mV3;
   float pH, DO, ORP, temp;
 
- // adc0 = ads.readADC_SingleEnded(0);
+  adc0 = ads.readADC_SingleEnded(0);
   adc1 = ads.readADC_SingleEnded(1);
   adc2 = ads.readADC_SingleEnded(2);
   adc3 = ads.readADC_SingleEnded(3);
 
  // volts0 = ads.computeVolts(adc0);
+  mV0 = ads.computeVolts(adc0) * 1000;
   mV1 = ads.computeVolts(adc1) * 1000;
   mV2 = ads.computeVolts(adc2) * 1000;
   mV3 = ads.computeVolts(adc3) * 1000;
 
-  pH = read_pH(mV1);
-  DO = read_do(mV2);
-  ORP = read_orp(mV3);
+
+
+
+  pH = read_pH(mV0);
+  DO = read_do(mV1);
+  ORP = read_orp(mV2);
   temp = read_temp();
 
+  Serial.print("pH: ");
+  Serial.print(mV0);
+  Serial.print("mV ---- DO: ");
+  Serial.print(mV1);
+  Serial.print("mV ---- ORP: ");
+  Serial.print(mV2);
+  Serial.print("mV ---- TEMP: ");
+  Serial.print(temp);
+  Serial.println(" C");
+  
 
  // DATA
   String leitura = String(rtc.now().day());
