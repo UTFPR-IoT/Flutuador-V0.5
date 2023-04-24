@@ -429,8 +429,8 @@ float read_do(float voltage_mV) {
 
 float read_orp(float voltage_mV) {
 
-  float calibracao = 1486; // 1726 - 240
-
+  //float calibracao = 1486; // 1726 - 240
+  float calibracao = 1493; // 1718 - 225 (calibracao nova)
   
   float DO_value = (voltage_mV - calibracao) ;
   return DO_value;
